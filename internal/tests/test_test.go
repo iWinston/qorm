@@ -1,10 +1,12 @@
-package test
+package tests
 
 import (
-	"github.com/iWinston/qorm"
-	"github.com/iWinston/qorm/test/model"
 	"log"
 	"os"
+
+	"github.com/iWinston/qorm/internal/tests/model"
+
+	"github.com/iWinston/qorm"
 )
 
 var DB *qorm.DB

@@ -12,22 +12,6 @@ import (
 	"gorm.io/gorm/schema"
 )
 
-func AddQuote(str string) string {
-	//c := context.Background()
-	// TODO getDbTypeFromCfg ?
-	//dbType := g.Cfg().MustGet(c, "database.type").String()
-	dbType := ""
-	switch dbType {
-	case "mysql":
-		str = "`" + str + "`"
-	case "postgres":
-		str = `"` + str + `"`
-	default:
-		panic("未知数据库类型:" + str)
-	}
-	return str
-}
-
 func QuoteTo(db *gorm.DB, str string) string {
 	builder := strings.Builder{}
 	db.Dialector.QuoteTo(&builder, str)

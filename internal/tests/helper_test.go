@@ -1,12 +1,13 @@
-package test
+package tests
 
 import (
-	"github.com/iWinston/qorm/test/model"
 	"sort"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/iWinston/qorm/internal/tests/model"
 )
 
 type Config struct {

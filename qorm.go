@@ -90,11 +90,6 @@ func (qdb *DB) QParam(param interface{}) *DB {
 	return qdb.QWhere(param).QOrder(param)
 }
 
-// QRes = QSelect().QOrder()
-func (qdb *DB) QRes(res interface{}) *DB {
-	return qdb.QSelect(res).QOrder(res)
-}
-
 // 实现链式调用
 // 值得注意的是，这个函数只管理qorm.DB的会话，不涉及对gorm.DB的影响
 // clone = 0 链式操作

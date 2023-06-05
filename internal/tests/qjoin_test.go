@@ -1,9 +1,10 @@
-package test
+package tests
 
 import (
 	"testing"
 
-	"github.com/iWinston/qorm/test/model"
+	"github.com/iWinston/qorm/internal/tests/model"
+
 	"gorm.io/gorm"
 )
 

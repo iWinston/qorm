@@ -8,7 +8,7 @@ import (
 func Open(dial gorm.Dialector, opts ...gorm.Option) (*DB, error) {
 	db, err := gorm.Open(dial, opts...)
 	if err != nil {
-		return nil, errors.Wrap(err, "打开数据库连接错误")
+		return nil, errors.Wrap(err, "failed to open the database connection by gorm")
 	}
 	return New(db), err
 }

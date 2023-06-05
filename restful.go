@@ -12,6 +12,11 @@ import (
 )
 
 // TODO 待测试ToStruct的效果
+// TODO 待验证
+// 对于非Model的结构体，Gorm的智能筛选字段和Preload是不能在一次链式操作中完成的。
+//具体原因参考以下链接：https://github.com/go-gorm/gorm/issues/4015
+// Qorm的Take和Find对此做了特殊处理，Take或者Find单个结构体时会先preload，然后智能筛选字段（智能筛选字段会覆盖原来的preload）
+//但是Find数组时，目前只能先智能筛选字段，然后preload（preload会覆盖原来的智能筛选字段） 对于这种设计上的不一致性，后续再进行处理，目前难以实现统一
 
 // QTake 兼容了同时Select和Preload
 func (qdb *DB) QTake(dest interface{}, conds ...interface{}) *DB {

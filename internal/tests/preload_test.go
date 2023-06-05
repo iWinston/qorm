@@ -1,10 +1,12 @@
-package test
+package tests
 
 import (
 	"fmt"
-	"github.com/iWinston/qorm/test/model"
-	"gorm.io/gorm"
 	"testing"
+
+	"github.com/iWinston/qorm/internal/tests/model"
+
+	"gorm.io/gorm"
 )
 
 func TestPreload(t *testing.T) {

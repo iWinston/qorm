@@ -57,7 +57,7 @@ db.Model(&User{}).Limit(10).Find(&APIUser{})
 Gorm的Where的局限在于：
 
 1. 只支持相等条件，不支持大于小于等条件
-2. 只支持模型里有的字段，不支持别名和连表
+2. 只支持模型里有的字段，不支持别名和联表
 
 Qorm通过在QWhere(param)的参数上添加where标签来实现对以上两点的支持 具体标签规则通过以下例子来说明：
 
@@ -258,7 +258,7 @@ API命名规则，如果增强Gorm，并且和Gorm兼容的，则不加Q，如�
 
 原理说明：Qorm会分析参数的标签，然后将信息储存到db.Meta中，调用QWhere()等API时，会拿出db.Meta中的对应信息生成sql。
 
-以上API都依赖于Model所以使用前必须使用调用Model函数！
+以上API都依赖于Model,所以使用前必须使用调用Model函数！
 
 2. 和Restful相关的API
 
