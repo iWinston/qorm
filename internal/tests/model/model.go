@@ -29,12 +29,14 @@ type User struct {
 	Languages []Language `gorm:"many2many:UserSpeak;"`
 	Friends   []*User    `gorm:"many2many:user_friends;"`
 	Active    bool
+	Extra     string
 }
 
 type Account struct {
 	gorm.Model
 	UserID sql.NullInt64
 	Number string
+	Extra  string
 }
 
 type Pet struct {
@@ -42,6 +44,7 @@ type Pet struct {
 	UserID *uint
 	Name   string
 	Toy    Toy `gorm:"polymorphic:Owner;"`
+	Extra  string
 }
 
 type Toy struct {
@@ -49,16 +52,19 @@ type Toy struct {
 	Name      string
 	OwnerID   string
 	OwnerType string
+	Extra     string
 }
 
 type Company struct {
-	ID   int
-	Name string
+	ID    int
+	Name  string
+	Extra string
 }
 
 type Language struct {
-	Code string `gorm:"primarykey"`
-	Name string
+	Code  string `gorm:"primarykey"`
+	Name  string
+	Extra string
 }
 
 type Coupon struct {
@@ -66,6 +72,7 @@ type Coupon struct {
 	AppliesToProducts []*CouponProduct `gorm:"foreignKey:CouponId;constraint:OnDelete:CASCADE"`
 	AmountOff         uint32           `gorm:"amount_off"`
 	PercentOff        float32          `gorm:"percent_off"`
+	Extra             string
 }
 
 type CouponProduct struct {
@@ -74,6 +81,7 @@ type CouponProduct struct {
 	Desc      string
 	CompanyID *int
 	Company   Company
+	Extra     string
 }
 
 type Order struct {
@@ -81,6 +89,7 @@ type Order struct {
 	Num      string
 	Coupon   *Coupon
 	CouponID string
+	Extra    string
 }
 
 type Parent struct {
@@ -88,6 +97,7 @@ type Parent struct {
 	FavChildID uint
 	FavChild   *Child
 	Children   []*Child
+	Extra      string
 }
 
 type Child struct {
@@ -95,4 +105,5 @@ type Child struct {
 	Name     string
 	ParentID *uint
 	Parent   *Parent
+	Extra    string
 }
