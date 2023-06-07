@@ -128,8 +128,10 @@ func Now() *time.Time {
 }
 
 func OpenTestConnection() (db *gorm.DB, err error) {
+	if err := os.Setenv("DEBUG", "true"); err != nil {
+		return nil, err
+	}
 	dbDSN := os.Getenv("GORM_DSN")
-
 	if dbDSN == "" {
 		dbDSN = "root:123456@tcp(localhost:3306)/qorm?charset=utf8&parseTime=True&loc=Local"
 	}

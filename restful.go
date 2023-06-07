@@ -11,7 +11,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// TODO 待测试ToStruct的效果
 // TODO 待验证
 // 对于非Model的结构体，Gorm的智能筛选字段和Preload是不能在一次链式操作中完成的。
 //具体原因参考以下链接：https://github.com/go-gorm/gorm/issues/4015
@@ -117,6 +116,11 @@ func (qdb *DB) QFind(dest interface{}, conds ...interface{}) *DB {
 
 // QCreateOne 将参数赋值给模型后创建
 func (qdb *DB) QCreateOne(param interface{}) *DB {
+	v := reflect.ValueOf(param)
+	if v.IsNil() {
+		qdb.QErr = gorm.ErrInvalidValue
+		return qdb
+	}
 	if qdb.Err() != nil {
 		return qdb
 	}
@@ -134,7 +138,6 @@ func (qdb *DB) QPatchOne(param interface{}) *DB {
 	if qdb.Err() != nil {
 		return qdb
 	}
-
 	qtx := qdb.getInstance()
 	printFileWithLineNum(qtx)
 	m := qtx.Statement.Model
@@ -153,7 +156,6 @@ func (qdb *DB) QPutOne(param interface{}) *DB {
 	if qdb.Err() != nil {
 		return qdb
 	}
-
 	qtx := qdb.getInstance()
 	printFileWithLineNum(qtx)
 	m := qtx.Statement.Model

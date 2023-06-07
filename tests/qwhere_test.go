@@ -3,12 +3,11 @@ package tests
 import (
 	"testing"
 
-	"github.com/iWinston/qorm/internal/tests/define"
-	"github.com/iWinston/qorm/internal/tests/model"
+	"github.com/iWinston/qorm/tests/model"
 )
 
 func TestWhere(t *testing.T) {
-	users := []model.User{
+	users := []model.SimpleUser{
 		*GetUser("find", Config{}),
 		*GetUser("find1", Config{}),
 		*GetUser("find", Config{}),
@@ -19,12 +18,12 @@ func TestWhere(t *testing.T) {
 	}
 
 	t.Run("First", func(t *testing.T) {
-		var first model.User
+		var first model.SimpleUser
 		name := "find1"
-		if err := DB.Debug().QWhere(&define.WhereParam{Name: &name}).First(&first).Error; err != nil {
+		if err := DB.Debug().QWhere(&model.WhereParam{Name: &name}).First(&first).Error; err != nil {
 			t.Errorf("errors happened when query first: %v", err)
 		} else {
-			CheckUser(t, first, users[1])
+			CheckSimpleUser(t, first, users[1])
 		}
 	})
 }

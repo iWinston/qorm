@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/iWinston/qorm/internal/tests/model"
+	model2 "github.com/iWinston/qorm/tests/model"
 
 	"gorm.io/gorm"
 )
@@ -21,7 +21,7 @@ func TestPreload(t *testing.T) {
 		NamedPet:  true}
 
 	names := []string{"find1", "find2", "find3"}
-	users := make([]model.User, 0, len(names))
+	users := make([]model2.SimpleUser, 0, len(names))
 	for _, name := range names {
 		users = append(users, *GetUser(name, cfg))
 	}
@@ -32,7 +32,7 @@ func TestPreload(t *testing.T) {
 
 	t.Run("JoinQuery", func(t *testing.T) {
 		var userMsg []UserCMsg
-		if err := DB.Debug().Model(&model.User{}).Where("`users`.`name` in (?)", names).
+		if err := DB.Debug().Model(&model2.SimpleUser{}).Where("`users`.`name` in (?)", names).
 			Find(&userMsg).Err(); err != nil {
 			panic(err)
 		}
@@ -42,9 +42,9 @@ func TestPreload(t *testing.T) {
 	})
 	t.Run("PreloadQuery", func(t *testing.T) {
 		var userMsg []UserMsg
-		if err := DB.Debug().Model(&model.User{}).Where("`users`.`name` in (?)", names).
-			Preload("Pets", func(db *gorm.DB) *gorm.DB { return db.Model(&model.Pet{}) }).
-			Preload("Manager", func(db *gorm.DB) *gorm.DB { return db.Model(&model.User{}) }).
+		if err := DB.Debug().Model(&model2.SimpleUser{}).Where("`users`.`name` in (?)", names).
+			Preload("Pets", func(db *gorm.DB) *gorm.DB { return db.Model(&model2.Pet{}) }).
+			Preload("Manager", func(db *gorm.DB) *gorm.DB { return db.Model(&model2.SimpleUser{}) }).
 			Find(&userMsg).Err(); err != nil {
 			panic(err)
 		}

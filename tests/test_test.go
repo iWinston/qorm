@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/iWinston/qorm/internal/tests/model"
+	"github.com/iWinston/qorm/tests/model"
 
 	"github.com/iWinston/qorm"
 )

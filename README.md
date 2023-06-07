@@ -262,9 +262,12 @@ API命名规则，如果增强Gorm，并且和Gorm兼容的，则不加Q，如�
 
 2. 和Restful相关的API
 
-- Take 对Take进行封装
-- Find 对Find进行封装
+- QTake 对Take进行封装
+- QFind 对Find进行封装
 - QCreateOne 将参数赋值给模型后创建
 - QPatchOne 查找模型之后，将param赋值给模型，然后Update
 - QDeleteOne 查找模型之后，如果存在的话，将其删除
 - QList 返回分页列表
+
+3.其他注意事项
+- 使用子查询时,因为qorm本身并不是ORM,因此需要注意传入的子查询语句,应当是gorm.DB,而不是qorm.DB,,eg: subQuery= qormDB.model(&user{}).DB。一个例子可参见 qcreate_one_test.TestCreateFromSubQuery()

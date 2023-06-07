@@ -39,13 +39,6 @@ func (qdb *DB) First(dest interface{}, conds ...interface{}) *DB {
 	return qtx
 }
 
-// Take return a record that match given conditions, the order will depend on the database implementation
-//func (qdb *DB) Take(dest interface{}, conds ...interface{}) *DB {
-//	qtx := qdb.getInstance()
-//	qtx.DB = qtx.DB.Take(dest, conds...)
-//	return qtx
-//}
-
 // Last find last record that match given conditions, order by primary key
 func (qdb *DB) Last(dest interface{}, conds ...interface{}) *DB {
 	qtx := qdb.getInstance()
@@ -58,10 +51,6 @@ func (qdb *DB) Last(dest interface{}, conds ...interface{}) *DB {
 func (qdb *DB) Take(value interface{}, conds ...interface{}) *DB {
 	qtx := qdb.getInstance()
 	printFileWithLineNum(qtx)
-	qtx.assignModelValue(value)
-	if qtx.Statement.Selects == nil {
-		qtx.QSelect(value)
-	}
 	qtx.DB = qtx.DB.Take(value, conds...)
 	return qtx
 }
@@ -70,11 +59,6 @@ func (qdb *DB) Take(value interface{}, conds ...interface{}) *DB {
 func (qdb *DB) Find(value interface{}, conds ...interface{}) *DB {
 	qtx := qdb.getInstance()
 	printFileWithLineNum(qtx)
-	qtx.assignModelValue(value)
-	//TODO 待删除, 有旧项目在直接Find,因此保留
-	if qtx.Statement.Selects == nil {
-		qtx.QSelect(value)
-	}
 	qtx.DB.Find(value, conds...)
 	return qtx
 }
