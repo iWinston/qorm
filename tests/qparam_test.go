@@ -11,27 +11,26 @@ type TestQParamReq struct {
 }
 
 func TestQParam(t *testing.T) {
-	users := []model.SimpleUser{
-		*GetSimpleUser("find", Config{}),
-		*GetSimpleUser("find2", Config{}),
-		*GetSimpleUser("find", Config{}),
+	users := []model.User{
+		*GetUser("find", Config{}),
+		*GetUser("find2", Config{}),
+		*GetUser("find", Config{}),
 	}
 
-	if err := DB.Create(&users).Error; err != nil {
+	if err := DB.Create(&users).Err(); err != nil {
 		t.Fatalf("errors happened when create users: %v", err)
 	}
-
 	t.Run("QParam and QList at the same time", func(t *testing.T) {
 		req := &TestQParamReq{
 			"find",
 		}
-		res := []model.SimpleUser{}
+		res := []model.User{}
 		var total int64 = -1
 		if err := DB.Debug().Model(&model.SimpleUser{}).QParam(req).QList(req, &res, &total).Err(); err != nil {
 			t.Errorf("errors happened when query first: %v", err)
 		} else {
-			CheckSimpleUser(t, res[0], users[0])
-			CheckSimpleUser(t, res[1], users[2])
+			CheckUser(t, res[0], users[0])
+			CheckUser(t, res[1], users[2])
 		}
 	})
 }

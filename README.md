@@ -206,7 +206,24 @@ db.Model(&model.Cat{}).QJoins("Owners")
 
 ### QCreateOne
 
-QCreateOne 将参数赋值给模型后创建
+QCreateOne 将参数赋值给模型后创建，不需要显式的指明 param 的表名是user表
+```go
+    type User struct{
+        gorm.Model
+        Name      string
+        Age       uint
+    }
+	type SimpleUser struct {
+		Name string
+		Age uint
+    }   
+	
+	DB.Model(&User{}).QCreateOne(&SimpleUser{
+		Name:"zhangsan",
+		Age: 18
+})
+// INSERT INTO `users` (`created_at`,`updated_at`,`deleted_at`,`name`,`age`) VALUES ('2023-06-11 20:35:12.237','2023-06-11 20:35:12.237',NULL,'create',18)
+```
 
 ### QPatchOne
 
@@ -214,7 +231,25 @@ QPatchOne 查找模型之后，将param赋值给模型，然后Update
 
 ### QDeleteOne
 
-QDeleteOne 查找模型之后，如果存在的话，将其删除
+QDeleteOne 查找模型之后，如果存在的话，将其删除，不存在的话，会抛出gorm.ErrRecordNotFound
+```go
+    type User struct{
+        gorm.Model
+        Name      string
+        Age       uint
+    }
+	type SimpleUser struct {
+		Id  uint `where:""`
+		Age uint `where:">="`
+    }   
+	
+	DB.Model(&User{}).QWhere(&SimpleUser{Id:1,Age:18}).QDeleteOne()
+// SELECT * FROM `users` WHERE `users`.`id` = 2 AND `users`.`age` >= 18 AND `users`.`deleted_at` IS NULL LIMIT 1
+// UPDATE `users` SET `deleted_at`='2023-06-11 20:38:08.247' WHERE `users`.`id` = 2 AND `users`.`age` >= 18 AND `users`.`id` = 2 AND `users`.`deleted_at` IS NULL
+
+
+```
+
 
 ### QList
 
@@ -264,9 +299,10 @@ API命名规则，如果增强Gorm，并且和Gorm兼容的，则不加Q，如�
 
 - QTake 对Take进行封装
 - QFind 对Find进行封装
-- QCreateOne 将单个param赋值给模型,然后Create
+- QCreateOne 将单个param赋值给模型,然后Create。
 - QPatchOne 查找模型之后，将param赋值给模型，然后Update
-- QDeleteOne 查找模型之后，如果存在的话，将其删除
+- QPutOne 查找模型之后,将param赋值给模型,然后Save
+- QDeleteOne 根据where条件查找模型之后，如果数据存在的，会将其删除,不存在会抛出gorm.ErrNotFoundRecord。
 - QList 返回分页列表
 
 3. 其他注意事项

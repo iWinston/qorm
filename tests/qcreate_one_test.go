@@ -12,10 +12,13 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-// QCreateOne 不支持map传参，和slice,支持单个model 本质上是将param的值copy到model上
+// QCreateOne  is only support created by a *struct, this func essentially  copy the value of the param to model and execute create
 func TestQCreateOne(t *testing.T) {
 	m := GetSimpleUser("create", Config{})
 	user := model.User{}
+	// when we want to insert a record to users table
+	// if we execute DB.Create(m),we will get a error that table 'qorm.simple_users' doesn't exist without specify that its table name is users.
+	// if we execute DB.Model(&model.user{}).QCreateOne(m),we don't have to specify that its table name is users explicitly
 	if results := DB.Model(&user).QCreateOne(m); results.Err() != nil {
 		t.Fatalf(" happened when create: %v", results.Err())
 	} else if results.RowsAffected != 1 {
