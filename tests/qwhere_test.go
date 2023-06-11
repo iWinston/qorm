@@ -8,9 +8,9 @@ import (
 
 func TestWhere(t *testing.T) {
 	users := []model.SimpleUser{
-		*GetUser("find", Config{}),
-		*GetUser("find1", Config{}),
-		*GetUser("find", Config{}),
+		*GetSimpleUser("find", Config{}),
+		*GetSimpleUser("find1", Config{}),
+		*GetSimpleUser("find", Config{}),
 	}
 
 	if err := DB.Create(&users).Error; err != nil {

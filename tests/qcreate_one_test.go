@@ -14,7 +14,7 @@ import (
 
 // QCreateOne 不支持map传参，和slice,支持单个model 本质上是将param的值copy到model上
 func TestQCreateOne(t *testing.T) {
-	m := GetUser("create", Config{})
+	m := GetSimpleUser("create", Config{})
 	user := model.User{}
 	if results := DB.Model(&user).QCreateOne(m); results.Err() != nil {
 		t.Fatalf(" happened when create: %v", results.Err())
@@ -34,8 +34,8 @@ func TestQCreateOne(t *testing.T) {
 		t.Errorf("user's updated at should be not zero")
 	}
 
-	var newUser model.SimpleUser
-	if err := DB.Model(&model.User{}).Where("id = ?", user.ID).First(&newUser).Error; err != nil {
+	var newUser model.User
+	if err := DB.Where("id = ?", user.ID).First(&newUser).Err(); err != nil {
 		t.Fatalf("errors happened when query: %v", err)
 	} else {
 		CheckUser(t, user, newUser)
@@ -43,7 +43,7 @@ func TestQCreateOne(t *testing.T) {
 }
 
 func TestCreateWithAssociations(t *testing.T) {
-	m := *GetUser("create_with_associations", Config{
+	m := GetSimpleUser("create_with_associations", Config{
 		Account:   true,
 		Pets:      2,
 		Toys:      3,
@@ -54,11 +54,17 @@ func TestCreateWithAssociations(t *testing.T) {
 		Friends:   1,
 	})
 	user := model.User{}
-	if err := DB.Model(&user).QCreateOne(m).Error; err != nil {
+	if err := DB.Model(&user).QCreateOne(m).Err(); err != nil {
 		t.Fatalf("errors happened when create: %v", err)
 	}
-	var user2 model.SimpleUser
-	DB.Preload("Account").Preload("Pets").Preload("Toys").Preload("Company").Preload("Manager").Preload("Team").Preload("Languages").Preload("Friends").Find(&user2, "id = ?", user.ID)
+	var user2 model.User
+	if err := DB.Model(&model.User{}).Preload("Account").
+		Preload("Pets").Preload("Toys").
+		Preload("Company").Preload("Manager").
+		Preload("Team").Preload("Languages").
+		Preload("Friends").Find(&user2, "id = ?", user.ID).Err(); err != nil {
+		t.Fatalf("errors happend where find: %v", err)
+	}
 	CheckUser(t, user, user2)
 }
 
@@ -66,30 +72,33 @@ func TestPolymorphicHasOne(t *testing.T) {
 	t.Run("Struct", func(t *testing.T) {
 		m := model.SimplePet{
 			Name: "PolymorphicHasOne",
-			Toy:  model.SimpleToy{Name: "Toy-PolymorphicHasOne"},
+			Toy:  model.Toy{Name: "Toy-PolymorphicHasOne"},
 		}
 		pet := model.Pet{}
 		if err := DB.Model(&pet).QCreateOne(&m).Error; err != nil {
 			t.Fatalf("errors happened when create: %v", err)
 		}
 
-		var pet2 model.SimplePet
+		var pet2 model.Pet
 		DB.Model(&model.Pet{}).Preload("Toy").Find(&pet2, "id = ?", pet.ID)
 		CheckPet(t, pet, pet2)
 	})
 }
 
 func TestCreateWithExistingTimestamp(t *testing.T) {
-	user := model.SimpleUser{Name: "CreateUserExistingTimestamp"}
+	m := model.SimpleUser{Name: "CreateUserExistingTimestamp"}
 	curTime := now.MustParse("2016-01-01")
-	user.CreatedAt = curTime
-	user.UpdatedAt = curTime
-	DB.Save(&user)
+	m.CreatedAt = curTime
+	m.UpdatedAt = curTime
+	user := model.User{}
+	if err := DB.Model(&user).QCreateOne(&m).Err(); err != nil {
+		t.Fatalf("errors happened when qputOne err:%v", err)
+	}
 
 	AssertEqual(t, user.CreatedAt, curTime)
 	AssertEqual(t, user.UpdatedAt, curTime)
 
-	var newUser model.SimpleUser
+	var newUser model.User
 	DB.First(&newUser, user.ID)
 
 	AssertEqual(t, newUser.CreatedAt, curTime)
@@ -97,7 +106,7 @@ func TestCreateWithExistingTimestamp(t *testing.T) {
 }
 
 func TestCreateWithNowFuncOverride(t *testing.T) {
-	user := model.SimpleUser{Name: "CreateUserTimestampOverride"}
+	m := model.SimpleUser{Name: "CreateUserTimestampOverride"}
 	curTime := now.MustParse("2016-01-01")
 
 	NEW := DB.Session(&gorm.Session{
@@ -105,13 +114,13 @@ func TestCreateWithNowFuncOverride(t *testing.T) {
 			return curTime
 		},
 	})
-
-	NEW.Save(&user)
+	user := model.User{}
+	NEW.Model(&user).QCreateOne(&m)
 
 	AssertEqual(t, user.CreatedAt, curTime)
 	AssertEqual(t, user.UpdatedAt, curTime)
 
-	var newUser model.SimpleUser
+	var newUser model.User
 	NEW.First(&newUser, user.ID)
 
 	AssertEqual(t, newUser.CreatedAt, curTime)
@@ -124,25 +133,32 @@ func TestCreateWithNoGORMPrimaryKey(t *testing.T) {
 		FriendID uint
 	}
 
-	DB.Migrator().DropTable(&JoinTable{})
+	if err := DB.Migrator().DropTable(&JoinTable{}); err != nil {
+		t.Fatalf("errors happened when dropTable err:%v", err)
+	}
 	if err := DB.AutoMigrate(&JoinTable{}); err != nil {
 		t.Errorf("no error should happen when auto migrate, but got %v", err)
 	}
 
 	jt := JoinTable{UserID: 1, FriendID: 2}
-	err := DB.Model(&JoinTable{}).QCreateOne(&jt).Error
-	if err != nil {
+	if err := DB.Model(&JoinTable{}).QCreateOne(&jt).Err(); err != nil {
 		t.Errorf("No error should happen when create a record without a GORM primary key. But in the database this primary key exists and is the union of 2 or more fields\n But got: %s", err)
 	}
 }
 
 func TestSelectWithCreate(t *testing.T) {
-	m := *GetUser("select_create", Config{Account: true, Pets: 3, Toys: 3, Company: true, Manager: true, Team: 3, Languages: 3, Friends: 4})
+	m := *GetSimpleUser("select_create", Config{Account: true, Pets: 3, Toys: 3, Company: true, Manager: true, Team: 3, Languages: 3, Friends: 4})
 	user := model.User{}
-	DB.Model(&user).Select("Account", "Toys", "Manager", "ManagerID", "Languages", "Name", "CreatedAt", "Age", "Active").QCreateOne(&m)
+	if err := DB.Model(&user).Select("Account", "Toys", "Manager", "ManagerID", "Languages", "Name", "CreatedAt", "Age", "Active").QCreateOne(&m).Err(); err != nil {
+		t.Fatalf("errors happened when qcreateOne err:%v", err)
+	}
 
-	var user2 model.SimpleUser
-	DB.Preload("Account").Preload("Pets").Preload("Toys").Preload("Company").Preload("Manager").Preload("Team").Preload("Languages").Preload("Friends").First(&user2, user.ID)
+	var user2 model.User
+	if err := DB.Preload("Account").Preload("Pets").Preload("Toys").
+		Preload("Company").Preload("Manager").Preload("Team").
+		Preload("Languages").Preload("Friends").First(&user2, user.ID).Err(); err != nil {
+		t.Fatalf("errors happened when first err:%v", err)
+	}
 
 	user.Birthday = nil
 	user.Pets = nil
@@ -154,12 +170,19 @@ func TestSelectWithCreate(t *testing.T) {
 }
 
 func TestOmitWithCreate(t *testing.T) {
-	m := *GetUser("omit_create", Config{Account: true, Pets: 3, Toys: 3, Company: true, Manager: true, Team: 3, Languages: 3, Friends: 4})
+	m := *GetSimpleUser("omit_create", Config{Account: true, Pets: 3, Toys: 3, Company: true, Manager: true, Team: 3, Languages: 3, Friends: 4})
 	user := model.User{}
-	DB.Model(&user).Omit("Account", "Toys", "Manager", "Birthday").QCreateOne(&m)
+	if err := DB.Model(&user).Omit("Account", "Toys", "Manager", "Birthday").QCreateOne(&m).Err(); err != nil {
+		t.Fatalf("errors happened when qcreateOne err:%v", err)
+	}
 
-	var result model.SimpleUser
-	DB.Preload("Account").Preload("Pets").Preload("Toys").Preload("Company").Preload("Manager").Preload("Team").Preload("Languages").Preload("Friends").First(&result, user.ID)
+	var result model.User
+	if err := DB.Preload("Account").
+		Preload("Pets").Preload("Toys").
+		Preload("Company").Preload("Manager").Preload("Team").
+		Preload("Languages").Preload("Friends").First(&result, user.ID).Err(); err != nil {
+		t.Fatalf("errors happened when first err:%v", err)
+	}
 
 	user.Birthday = nil
 	user.Account = model.Account{}
@@ -168,12 +191,16 @@ func TestOmitWithCreate(t *testing.T) {
 
 	CheckUser(t, user, result)
 
-	m2 := *GetUser("omit_create", Config{Account: true, Pets: 3, Toys: 3, Company: true, Manager: true, Team: 3, Languages: 3, Friends: 4})
+	m2 := *GetSimpleUser("omit_create", Config{Account: true, Pets: 3, Toys: 3, Company: true, Manager: true, Team: 3, Languages: 3, Friends: 4})
 	user2 := model.User{}
-	DB.Model(&user2).Omit(clause.Associations).QCreateOne(&m2)
+	if err := DB.Model(&user2).Omit(clause.Associations).QCreateOne(&m2).Err(); err != nil {
+		t.Fatalf("errors happened when qcreateOne err:%v", err)
+	}
 
-	var result2 model.SimpleUser
-	DB.Model(&model.User{}).Preload(clause.Associations).First(&result2, user2.ID)
+	var result2 model.User
+	if err := DB.Model(&model.User{}).Preload(clause.Associations).First(&result2, user2.ID).Err(); err != nil {
+		t.Fatalf("errors happened when first err:%v", err)
+	}
 
 	user2.Account = model.Account{}
 	user2.Toys = nil
@@ -234,13 +261,12 @@ func TestCreateWithAutoIncrementCompositeKey(t *testing.T) {
 		t.Fatalf("failed to migrate, got error %v", err)
 	}
 
-	m := &CompositeKeyProduct{
+	prod := &CompositeKeyProduct{
 		LanguageCode: 56,
 		Code:         "Code56",
 		Name:         "ProductName56",
 	}
-	prod := &CompositeKeyProduct{}
-	if err := DB.Model(prod).QCreateOne(&m).Error; err != nil {
+	if err := DB.Model(prod).QCreateOne(&prod).Error; err != nil {
 		t.Fatalf("failed to create, got error %v", err)
 	}
 
@@ -265,24 +291,27 @@ func TestCreateOnConfilctWithDefalutNull(t *testing.T) {
 	err = DB.AutoMigrate(&OnConfilctUser{})
 	AssertEqual(t, err, nil)
 
-	m := OnConfilctUser{
+	u := OnConfilctUser{
 		ID:     "on-confilct-user-id",
 		Name:   "on-confilct-user-name",
 		Email:  "on-confilct-user-email",
 		Mobile: "on-confilct-user-mobile",
 	}
-	u := OnConfilctUser{}
-	err = DB.Model(&u).QCreateOne(&m).Error
+	err = DB.Model(&u).QCreateOne(&u).Error
 	AssertEqual(t, err, nil)
 
 	u.Name = "on-confilct-user-name-2"
 	u.Email = "on-confilct-user-email-2"
 	u.Mobile = ""
-	err = DB.Model(&u).Clauses(clause.OnConflict{UpdateAll: true}).QCreateOne(&u).Error
+	if err = DB.Model(&u).Clauses(clause.OnConflict{UpdateAll: true}).QCreateOne(&u).Err(); err != nil {
+		t.Fatalf("errors happened when qcreateOne err:%v", err)
+	}
 	AssertEqual(t, err, nil)
 
 	var u2 OnConfilctUser
-	err = DB.Where("id = ?", u.ID).First(&u2).Error
+	if err = DB.Where("id = ?", u.ID).First(&u2).Err(); err != nil {
+		t.Fatalf("errors happened when first err:%v", err)
+	}
 	AssertEqual(t, err, nil)
 	AssertEqual(t, u2.Name, "on-confilct-user-name-2")
 	AssertEqual(t, u2.Email, "on-confilct-user-email-2")

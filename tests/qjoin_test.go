@@ -43,7 +43,7 @@ func TestNestJoins(t *testing.T) {
 }
 
 func TestJoins(t *testing.T) {
-	user := *GetUser("joins-1", Config{Company: true, Manager: true, Account: true, Pets: 2})
+	user := *GetSimpleUser("joins-1", Config{Company: true, Manager: true, Account: true, Pets: 2})
 
 	DB.Create(&user)
 

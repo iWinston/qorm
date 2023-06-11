@@ -12,9 +12,9 @@ type Req struct {
 
 func TestList(t *testing.T) {
 	users := []model.SimpleUser{
-		*GetUser("find", Config{}),
-		*GetUser("find2", Config{}),
-		*GetUser("find", Config{}),
+		*GetSimpleUser("find", Config{}),
+		*GetSimpleUser("find2", Config{}),
+		*GetSimpleUser("find", Config{}),
 	}
 
 	if err := DB.Create(&users).Error; err != nil {

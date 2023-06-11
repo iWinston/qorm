@@ -16,22 +16,18 @@ type SimpleUser struct {
 	Name      string
 	Age       uint
 	Birthday  *time.Time
-	Account   SimpleAccount `gorm:"foreignKey:UserID"`
-	Pets      []*SimplePet  `gorm:"foreignKey:UserID"`
-	NamedPet  *SimplePet    `gorm:"foreignKey:UserID"`
-	Toys      []SimpleToy   `gorm:"polymorphic:Owner"`
+	Account   Account `gorm:"foreignKey:UserID"`
+	Pets      []*Pet  `gorm:"foreignKey:UserID"`
+	NamedPet  *Pet    `gorm:"foreignKey:UserID"`
+	Toys      []Toy   `gorm:"polymorphic:Owner"`
 	CompanyID *int
-	Company   SimpleCompany `gorm:"foreignKey:CompanyID"`
+	Company   Company `gorm:"foreignKey:CompanyID"`
 	ManagerID *uint
-	Manager   *SimpleUser      `gorm:"foreignKey:ManagerID"`
-	Team      []SimpleUser     `gorm:"foreignKey:ManagerID"`
-	Languages []SimpleLanguage `gorm:"many2many:UserSpeak;foreignKey:ID;joinForeignKey:UserID;References:Code;JoinReferences:LanguageCode"`
-	Friends   []*SimpleUser    `gorm:"many2many:user_friends;foreignKey:ID;joinForeignKey:UserID;References:ID;JoinReferences:FriendID"`
+	Manager   *User      `gorm:"foreignKey:ManagerID"`
+	Team      []User     `gorm:"foreignKey:ManagerID"`
+	Languages []Language `gorm:"many2many:UserSpeak;foreignKey:ID;joinForeignKey:UserID;References:Code;JoinReferences:LanguageCode"`
+	Friends   []*User    `gorm:"many2many:user_friends;foreignKey:ID;joinForeignKey:UserID;References:ID;JoinReferences:FriendID"`
 	Active    bool
-}
-
-func (i SimpleUser) TableName() string {
-	return "users"
 }
 
 type SimpleAccount struct {
@@ -48,7 +44,7 @@ type SimplePet struct {
 	gorm.Model
 	UserID *uint
 	Name   string
-	Toy    SimpleToy `gorm:"polymorphic:Owner;"`
+	Toy    Toy `gorm:"polymorphic:Owner;"`
 }
 
 func (s *SimplePet) TableName() string {

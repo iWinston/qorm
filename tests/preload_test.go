@@ -23,7 +23,7 @@ func TestPreload(t *testing.T) {
 	names := []string{"find1", "find2", "find3"}
 	users := make([]model2.SimpleUser, 0, len(names))
 	for _, name := range names {
-		users = append(users, *GetUser(name, cfg))
+		users = append(users, *GetSimpleUser(name, cfg))
 	}
 
 	if err := DB.Create(&users).Error; err != nil {
