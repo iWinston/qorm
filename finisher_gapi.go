@@ -51,6 +51,10 @@ func (qdb *DB) Last(dest interface{}, conds ...interface{}) *DB {
 func (qdb *DB) Take(value interface{}, conds ...interface{}) *DB {
 	qtx := qdb.getInstance()
 	printFileWithLineNum(qtx)
+	//qtx.assignModelValue(value)
+	//if qtx.Statement.Selects == nil {
+	//	qtx.QSelect(value)
+	//}
 	qtx.DB = qtx.DB.Take(value, conds...)
 	return qtx
 }
@@ -59,6 +63,10 @@ func (qdb *DB) Take(value interface{}, conds ...interface{}) *DB {
 func (qdb *DB) Find(value interface{}, conds ...interface{}) *DB {
 	qtx := qdb.getInstance()
 	printFileWithLineNum(qtx)
+	//qtx.assignModelValue(value)
+	//if qtx.Statement.Selects == nil {
+	//	qtx.QSelect(value)
+	//}
 	qtx.DB.Find(value, conds...)
 	return qtx
 }
