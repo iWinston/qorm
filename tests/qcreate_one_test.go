@@ -12,7 +12,7 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-// QCreateOne  is only support created by a *struct, this func essentially  copy the value of the param to model and execute create
+// QCreateOne  is only support created by a *struct, this func   is essentially  copying the value of the param to model and execute create
 func TestQCreateOne(t *testing.T) {
 	m := GetSimpleUser("create", Config{})
 	user := model.User{}

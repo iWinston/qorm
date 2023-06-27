@@ -128,7 +128,8 @@ func (qdb *DB) QCreateOne(param interface{}) *DB {
 	printFileWithLineNum(qtx)
 	m := qtx.Statement.Model
 	if err := ToStruct(param, m); err != nil {
-		panic(err)
+		qtx.QErr = errors.Wrap(err, "将param复制到Model时出错")
+		return qtx
 	}
 	return qtx.Create(m)
 }
@@ -146,7 +147,8 @@ func (qdb *DB) QPatchOne(param interface{}) *DB {
 		return takeTX
 	}
 	if err := ToStruct(param, m); err != nil {
-		panic(err)
+		qtx.QErr = errors.Wrap(err, "将param复制到Model时出错")
+		return qtx
 	}
 	return qtx.Session(&gorm.Session{FullSaveAssociations: true}).Updates(m)
 }
@@ -164,7 +166,8 @@ func (qdb *DB) QPutOne(param interface{}) *DB {
 		return takeTX
 	}
 	if err := ToStruct(param, m); err != nil {
-		panic(err)
+		qtx.QErr = errors.Wrap(err, "将param复制到Model时出错")
+		return qtx
 	}
 	return qtx.Session(&gorm.Session{FullSaveAssociations: true}).Save(m)
 }

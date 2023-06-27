@@ -307,4 +307,4 @@ API命名规则，如果增强Gorm，并且和Gorm兼容的，则不加Q，如�
 
 3. 其他注意事项
 
-- 使用子查询时,因为qorm本身并不是ORM,因此需要注意传入的子查询语句,应当是gorm.DB,而不是qorm.DB,eg: subQuery= qormDB.model(&user{}).DB。一个例子可参见 qcreate_one_test.TestCreateFromSubQuery()
+- 使用子查询时,因为qorm本身并不是ORM,因此需要注意传入的子查询语句,应当是gorm.DB,而不是qorm.DB,eg: subQuery= qormDB.DB。一个例子可参见 qcreate_one_test.TestCreateFromSubQuery()
